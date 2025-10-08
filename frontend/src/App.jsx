@@ -5,17 +5,38 @@ import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+import { axiosInstance } from "./lib/axios";
+import { useAuthStore } from "./store/useAuthStore";
+import { useEffect } from "react";
+import { Loader } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function App() {
+  const { authUser, checkAuth, isCheckedAuth } = useAuthStore();
+  useEffect(
+    () => {
+      checkAuth();
+    },
+    { checkAuth }
+  );
+  console.log({ authUser });
+
+  if (!isCheckedAuth && !authUser) {
+    <div className="flex items-center justify-center h-screen">
+      <Loader className="size-10 animate-spin" />
+    </div>;
+  }
+  const navigate = useNavigate();
+
   return (
     <div>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={authUser ? <Home /> : navigate("/login")} />
+        <Route path="/signup" element={!authUser ? <SignUp /> : navigate("/")} />
+        <Route path="/login" element={!authUser ? <Login /> : navigate("/")} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={authUser ? <Profile /> : navigate("/login")} />
       </Routes>
     </div>
   );
